@@ -18,6 +18,7 @@ const storage = multer.diskStorage({
         file.originalname);
     }
 });
+
 const upload = multer({storage});
 
 if (!fs.existsSync('uploads')) {
