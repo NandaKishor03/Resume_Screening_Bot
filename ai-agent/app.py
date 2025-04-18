@@ -1,268 +1,112 @@
-# from flask import Flask, request, jsonify
-# from flask_cors import CORS
-# import os
-# import PyPDF2
-# import docx
-# from sklearn.feature_extraction.text import TfidfVectorizer
-# from sklearn.metrics.pairwise import cosine_similarity
-
-# app = Flask(__name__)
-# CORS(app)
-
-# UPLOAD_FOLDER = 'flask_uploads'
-# ALLOWED_EXTENSIONS = {'pdf', 'docx'}
-
-# app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-# def allowed_file(filename):
-#     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-# def extract_text_from_pdf(pdf_path):
-#     text = ""
-#     with open(pdf_path, 'rb') as file:
-#         reader = PyPDF2.PdfReader(file)
-#         for page in reader.pages:
-#             text += page.extract_text()
-#     return text
-
-# def extract_text_from_docx(docx_path):
-#     doc = docx.Document(docx_path)
-#     return "\n".join([para.text for para in doc.paragraphs])
-
-# @app.route('/match', methods=["POST"])
-# def upload_file():
-#     print("Request content type:", request.content_type)
-#     print("Request headers:", request.headers)
-    
-#     if 'resume' not in request.files:
-#         print("No resume in request.files")
-#         return jsonify({'error': 'No resume file uploaded'}), 400
-    
-#     file = request.files['resume']
-#     jd_text = request.form.get('JD', "")
-
-#     if file.filename == '':
-#         return jsonify({'error': 'No selected file'}), 400
-
-#     if not allowed_file(file.filename):
-#         return jsonify({'error': 'Invalid file type'}), 400
-
-#     try:
-#         if not os.path.exists(UPLOAD_FOLDER):
-#             os.makedirs(UPLOAD_FOLDER)
-            
-#         file_path = os.path.join(UPLOAD_FOLDER, file.filename)
-#         file.save(file_path)
-
-#         if file.filename.endswith('.pdf'):
-#             extracted_text = extract_text_from_pdf(file_path)
-#         elif file.filename.endswith('.docx'):
-#             extracted_text = extract_text_from_docx(file_path)
-
-#         if not jd_text.strip():
-#             os.remove(file_path)
-#             return jsonify({'error': 'Job description required'}), 400
-
-#         vectorizer = TfidfVectorizer(stop_words='english')
-#         tfidf_matrix = vectorizer.fit_transform([jd_text, extracted_text])
-#         cosine_sim = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])
-#         match_score = round(cosine_sim[0][0] * 100, 2)
-
-#         os.remove(file_path)
-
-#         return jsonify({
-#             'match_score': match_score,
-#             'suggestions': [],
-#             'missing_keywords': []
-#         })
-
-#     except Exception as e:
-#         if 'file_path' in locals() and os.path.exists(file_path):
-#             os.remove(file_path)
-#         return jsonify({'error': str(e)}), 500
-
-# if __name__ == '__main__':
-#     if not os.path.exists(UPLOAD_FOLDER):
-#         os.makedirs(UPLOAD_FOLDER)
-#     app.run(host='0.0.0.0', port=5001, debug=True)
-
-
-
-
-
-
-
-
-
-
-
-
-
-# # from flask import Flask, request, jsonify
-# # from flask_cors import CORS
-# # import os
-# # import PyPDF2
-# # import docx
-# # from sklearn.feature_extraction.text import TfidfVectorizer
-# # from sklearn.metrics.pairwise import cosine_similarity
-# # import re
-
-# # app = Flask(__name__)
-# # CORS(app)
-
-# # UPLOAD_FOLDER = 'flask_uploads'
-# # ALLOWED_EXTENSIONS = {'pdf', 'docx'}
-
-# # app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-# # def allowed_file(filename):
-# #     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-# # def extract_text_from_pdf(pdf_path):
-# #     text = ""
-# #     with open(pdf_path, 'rb') as file:
-# #         reader = PyPDF2.PdfReader(file)
-# #         for page in reader.pages:
-# #             text += page.extract_text()
-# #     return text
-
-# # def extract_text_from_docx(docx_path):
-# #     doc = docx.Document(docx_path)
-# #     return "\n".join([para.text for para in doc.paragraphs])
-
-# # def calculate_match(jd_text, resume_text):
-# #     vectorizer = TfidfVectorizer(stop_words='english')
-# #     tfidf_matrix = vectorizer.fit_transform([jd_text, resume_text])
-# #     cosine_sim = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])
-# #     return round(cosine_sim[0][0] * 100, 2)
-
-# # @app.route('/match', methods=["POST"])
-# # def upload_file():
-# #     print("Received request with files:", request.files)
-# #     print("Received form data:", request.form)
-    
-# #     if 'resume' not in request.files:
-# #         return jsonify({'error': 'No resume file uploaded'}), 400
-    
-# #     file = request.files['resume']
-# #     jd_text = request.form.get('JD', "")
-
-# #     if file.filename == '':
-# #         return jsonify({'error': 'No selected file'}), 400
-
-# #     if not allowed_file(file.filename):
-# #         return jsonify({'error': 'Invalid file type'}), 400
-
-# #     try:
-# #         if not os.path.exists(UPLOAD_FOLDER):
-# #             os.makedirs(UPLOAD_FOLDER)
-            
-# #         file_path = os.path.join(UPLOAD_FOLDER, file.filename)
-# #         file.save(file_path)
-
-# #         if file.filename.endswith('.pdf'):
-# #             extracted_text = extract_text_from_pdf(file_path)
-# #         elif file.filename.endswith('.docx'):
-# #             extracted_text = extract_text_from_docx(file_path)
-
-# #         if not jd_text.strip():
-# #             os.remove(file_path)
-# #             return jsonify({'error': 'Job description required'}), 400
-
-# #         match_score = calculate_match(jd_text, extracted_text)
-# #         os.remove(file_path)
-
-# #         return jsonify({
-# #             'match_score': match_score,
-# #             'suggestions': [],
-# #             'missing_keywords': []
-# #         }), 200
-
-# #     except Exception as e:
-# #         if os.path.exists(file_path):
-# #             os.remove(file_path)
-# #         return jsonify({'error': str(e)}), 500
-
-# # if __name__ == '__main__':
-# #     if not os.path.exists(UPLOAD_FOLDER):
-# #         os.makedirs(UPLOAD_FOLDER)
-# #     app.run(host='0.0.0.0', port=5001, debug=True)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import os
-from parser import parse_file
-from matcher import match_resume
+from sentence_transformers import SentenceTransformer, CrossEncoder
+from keybert import KeyBERT
+import torch
+import logging
+import json
+import spacy
+from spacy import displacy
+import nltk
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+import re
+import PyPDF2
+import docx
 
 app = Flask(__name__)
 CORS(app)
 
-UPLOAD_FOLDER = 'flask_uploads'
-ALLOWED_EXTENSIONS = {'pdf', 'docx'}
+# Initialize logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+# Load pre-trained models
+sbert_model = SentenceTransformer('paraphrase-mpnet-base-v2')
+cross_encoder = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')
+keyword_model = KeyBERT(model=sbert_model)
 
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+# Load spaCy model for entity recognition
+nlp = spacy.load('en_core_web_sm')
 
-@app.route('/match', methods=["POST"])
-def upload_file():
-    print("\n==== New Request ====")
-    print("Headers:", request.headers)
-    print("Form data:", request.form)
-    print("Files:", request.files)
-    
-    if 'resume' not in request.files:
-        print("ERROR: No resume in request.files")
-        return jsonify({'error': 'No resume file in request'}), 400
-    
-    file = request.files['resume']
-    jd_text = request.form.get('JD', "")
-
-    if file.filename == '':
-        return jsonify({'error': 'No selected file'}), 400
-
+# /match endpoint
+@app.route('/match', methods=['POST'])
+def match_resume():
     try:
-        os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-        file_path = os.path.join(UPLOAD_FOLDER, file.filename)
-        file.save(file_path)
-        print(f"File saved to: {file_path}")
+        print("Received request...")
+        jd = request.form.get('jd')
+        resume = request.files.get('resume')
 
-        extracted_text = parse_file(file_path)
-        match_score = match_resume(jd_text, extracted_text)
-        
-        os.remove(file_path)
-        
+        # Validate job description and resume
+        if not jd or not resume:
+            return jsonify({'error': 'Please provide both job description and resume'}), 400
+
+        if not isinstance(jd, str) or not jd.strip():
+            return jsonify({'error': 'Invalid job description'}), 400
+
+        if not resume.filename or not resume.content_type:
+            return jsonify({'error': 'Invalid resume file'}), 400
+
+        # Extract entities from job description
+        entities = extract_entities(jd)
+
+        # Extract keywords from job description
+        keywords = extract_keywords(jd)
+
+        # Calculate similarity score
+        similarity_score = calculate_similarity(resume, entities, keywords)
+
         return jsonify({
-            'match_score': match_score,
-            'suggestions': [],
-            'missing_keywords': []
+            'imilarity_score': similarity_score,
+            'entities': entities,
+            'keywords': keywords,
         })
-
     except Exception as e:
-        print(f"ERROR: {str(e)}")
-        if 'file_path' in locals() and os.path.exists(file_path):
-            os.remove(file_path)
+        logging.error(e)
         return jsonify({'error': str(e)}), 500
 
+def extract_entities(jd):
+    # Use spaCy for entity recognition
+    doc = nlp(jd)
+    entities = [(ent.text, ent.label_) for ent in doc.ents]
+    return entities
+
+def extract_keywords(jd):
+    # Use KeyBERT for keyword extraction
+    keywords = keyword_model.extract_keywords(jd, top_n=10)
+    return [keyword for keyword, _ in keywords]
+
+def calculate_similarity(resume, entities, keywords):
+    # Use Sentence Transformers for similarity calculation
+    resume_text = extract_text_from_file(resume)
+    similarity_score = 0
+    for entity in entities:
+        entity_text = entity[0]
+        similarity = sbert_model.encode([entity_text, resume_text])
+        similarity_score += similarity[0].dot(similarity[1])
+    for keyword in keywords:
+        keyword_text = keyword
+        similarity = sbert_model.encode([keyword_text, resume_text])
+        similarity_score += similarity[0].dot(similarity[1])
+    return similarity_score / (len(entities) + len(keywords))
+
+def extract_text_from_file(file):
+    # Extract text from PDF, DOC, or DOCX file
+    if file.content_type == 'application/pdf':
+        # Use PyPDF2 for PDF files
+        pdf_reader = PyPDF2.PdfReader(file.stream)
+        text = ''
+        for page in pdf_reader.pages:
+            text += page.extract_text()
+        return text
+    elif file.content_type in ['application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']:
+        # Use python-docx for DOC and DOCX files
+        doc = docx.Document(file.stream)
+        text = ''
+        for para in doc.paragraphs:
+            text += para.text
+        return text
+    else:
+        return ''
+
 if __name__ == '__main__':
-    if not os.path.exists(UPLOAD_FOLDER):
-        os.makedirs(UPLOAD_FOLDER)
-    app.run(host='0.0.0.0', port=5001, debug=True)
+    app.run(port=8000)
